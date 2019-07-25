@@ -9,10 +9,6 @@ public class Entity1 extends Entity
         // Print that we are initalizing the node
         NetworkSimulator.printDebug("Entity"+entityNum+"() -> Initializing link costs for neighbors 0,2");
 
-        // Start everything to infinity
-        for(int i = 0; i < NetworkSimulator.NUMENTITIES; i++)
-            for(int j = 0; j < NetworkSimulator.NUMENTITIES; j++)
-                distanceTable[i][j] = UNITIALIZED;
 
         // Initialize our neighboring links
         distanceTable[0][0] = 1;
@@ -49,10 +45,8 @@ public class Entity1 extends Entity
 
             int prevMin = getDestMinCost(dest);
 
-            int costToRecieved = distanceTable[dest][dest];
-            //int costToNeighbor = (distanceTable[via][via] == UNITIALIZED) ? 0 : distanceTable[via][via];
-
-            distanceTable[dest][p.getSource()] = Math.min(INFINITY,costToRecieved + p.getMincost(dest));
+            int costToSource = distanceTable[dest][dest];
+            distanceTable[dest][p.getSource()] = Math.min(INFINITY,costToSource + p.getMincost(dest));
 
             if(prevMin != getDestMinCost(dest))
                 doNotify = true;
@@ -65,7 +59,7 @@ public class Entity1 extends Entity
         // If the minium distance has changed notify neighbors
         if(doNotify)
         {
-            NetworkSimulator.printDebug("Entity"+entityNum+".update() -> Distance table has changed");
+            NetworkSimulator.printDebug("Entity"+entityNum+".update() -> Distance vector has changed");
             notifyNeighbors();
         }
 
@@ -76,15 +70,36 @@ public class Entity1 extends Entity
     {
         NetworkSimulator.printDebug("Entity"+entityNum+".linkCostChangeHandler() -> Link "+whichLink+" cost has changed to "+newCost);
 
-        // Record previous minimum distance
-        int prevMinDist = getDestMinCost(whichLink);
+        boolean doNotify = false;
 
-        // Update the table
-        distanceTable[whichLink][whichLink] = newCost;
+        // Update the current cost to the destination node
+        for(int dest = 0; dest < NetworkSimulator.NUMENTITIES; dest++){
+            if(dest == entityNum) continue;
 
-        // If the minium distance has changed notify neighbors
-        if(getDestMinCost(whichLink) != prevMinDist)
+            int prevMin = getDestMinCost(dest);
+
+            // Assign here so we can get the prev min for the changed link first
+            distanceTable[whichLink][whichLink] = newCost;
+
+            // Skip over adding the distance if it is the changed link
+            if(dest != whichLink){
+                int costToSource = distanceTable[dest][dest];
+                distanceTable[dest][whichLink] = Math.min(INFINITY,costToSource + newCost);
+            }
+
+
+            if(prevMin != getDestMinCost(dest))
+                doNotify = true;
+
+        }
+
+        if(doNotify)
+        {
+            NetworkSimulator.printDebug("Entity"+entityNum+".linkCostChangeHandler() -> Distance vector has changed");
             notifyNeighbors();
+        }
+
+
     }
 
     private void notifyNeighbors()

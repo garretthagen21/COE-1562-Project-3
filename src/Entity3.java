@@ -9,14 +9,6 @@ public class Entity3 extends Entity
         // Print that we are initalizing the node
         NetworkSimulator.printDebug("Entity"+entityNum+"() -> Initializing link costs for neighbors 0,2");
 
-       // Start everything to infinity
-       for(int i = 0; i < NetworkSimulator.NUMENTITIES; i++)
-           for(int j = 0; j < NetworkSimulator.NUMENTITIES; j++)
-               distanceTable[i][j] = UNITIALIZED;
-
-
-
-
         // Initialize our neighboring links
         distanceTable[0][0] = 7;
         distanceTable[1][1] = INFINITY;
@@ -52,10 +44,8 @@ public class Entity3 extends Entity
 
             int prevMin = getDestMinCost(dest);
 
-            int costToRecieved = distanceTable[dest][dest];
-            //int costToNeighbor = (distanceTable[via][via] == UNITIALIZED) ? 0 : distanceTable[via][via];
-
-            distanceTable[dest][p.getSource()] = Math.min(INFINITY,costToRecieved + p.getMincost(dest));
+            int costToSource = distanceTable[dest][dest];
+            distanceTable[dest][p.getSource()] = Math.min(INFINITY,costToSource + p.getMincost(dest));
 
             if(prevMin != getDestMinCost(dest))
                 doNotify = true;
