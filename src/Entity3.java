@@ -44,18 +44,21 @@ public class Entity3 extends Entity
         // Print that we have recieved a packet
         NetworkSimulator.printDebug("Entity"+entityNum+".update() -> Recieved Packet: "+p.toString());
 
+        boolean doNotify = false;
 
         // Update the current cost to the destination node
-        int prevMin = getDestMinCost(p.getSource());
+        for(int dest = 0; dest < NetworkSimulator.NUMENTITIES; dest++){
+            if(dest == entityNum) continue;
 
-        for(int via = 0; via < NetworkSimulator.NUMENTITIES; via++)
-        {
-            if(via == entityNum) continue;
+            int prevMin = getDestMinCost(dest);
 
-            int costToNeighbor = distanceTable[via][via];
+            int costToRecieved = distanceTable[dest][dest];
             //int costToNeighbor = (distanceTable[via][via] == UNITIALIZED) ? 0 : distanceTable[via][via];
 
-            distanceTable[p.getSource()][via] = Math.min(INFINITY,costToNeighbor + p.getMincost(via));
+            distanceTable[dest][p.getSource()] = Math.min(INFINITY,costToRecieved + p.getMincost(dest));
+
+            if(prevMin != getDestMinCost(dest))
+                doNotify = true;
 
         }
 
@@ -63,7 +66,7 @@ public class Entity3 extends Entity
         printDT();
 
         // If the minium distance has changed notify neighbors
-        if(prevMin != getDestMinCost(p.getSource()))
+        if(doNotify)
         {
             NetworkSimulator.printDebug("Entity"+entityNum+".update() -> Distance table has changed");
             notifyNeighbors();
