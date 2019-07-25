@@ -4,6 +4,7 @@ public abstract class Entity
 {
     // Convenience variable
     protected final static int INFINITY = 999;
+    protected final static int UNITIALIZED = 0;
 
     // Each entity will have a distance table
     protected int[][] distanceTable = new int[NetworkSimulator.NUMENTITIES]
