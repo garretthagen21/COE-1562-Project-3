@@ -11,6 +11,11 @@ public class Entity0 extends Entity
         // Print that we are initalizing the node
         NetworkSimulator.printDebug("Entity"+entityNum+"() -> Initializing link costs for neighbors 1,2,3");
 
+        // Initialize everything to INFINITY
+        for(int dest = 0; dest < NetworkSimulator.NUMENTITIES; dest++)
+            for(int via = 0; via < NetworkSimulator.NUMENTITIES; via++)
+                distanceTable[dest][via] = INFINITY;
+
         // Initialize table
         distanceTable[entityNum][entityNum] = 0;
         distanceTable[1][1] = 1;
@@ -40,14 +45,18 @@ public class Entity0 extends Entity
 
         boolean doNotify = false;
 
+        // Get the cost to the neighboring node
+        int costToSource = distanceTable[p.getSource()][p.getSource()];
+
         // Update the current cost to the destination node
         for(int dest = 0; dest < NetworkSimulator.NUMENTITIES; dest++){
-           if(dest == entityNum) continue;
 
-           int prevMin = getDestMinCost(dest);
+            if(dest == entityNum) continue;
 
-           int costToSource = distanceTable[dest][dest];
-           distanceTable[dest][p.getSource()] = Math.min(INFINITY,costToSource + p.getMincost(dest));
+            int prevMin = getDestMinCost(dest);
+
+            // Update the table
+            distanceTable[dest][p.getSource()] = Math.min(INFINITY,costToSource + p.getMincost(dest));
 
            if(prevMin != getDestMinCost(dest))
                doNotify = true;
@@ -137,8 +146,8 @@ public class Entity0 extends Entity
         {
             int viaCost = distanceTable[dest][via];
 
-            if(viaCost > 0 && viaCost < minCost)
-                minCost = distanceTable[dest][via];
+            if(viaCost < minCost)
+                minCost = viaCost;
 
         }
 
