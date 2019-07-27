@@ -11,6 +11,17 @@ public class Entity0 extends Entity
         // Print that we are initalizing the node
         NetworkSimulator.printDebug("Entity"+entityNum+"() -> Initializing link costs for neighbors 1,2,3");
 
+        // Initialize the table
+        initTable();
+
+        // Notify all of the directly connected neighbors
+        notifyNeighbors();
+
+    }
+
+    // Init the table
+    private void initTable()
+    {
         // Initialize everything to INFINITY
         for(int dest = 0; dest < NetworkSimulator.NUMENTITIES; dest++)
             for(int via = 0; via < NetworkSimulator.NUMENTITIES; via++)
@@ -22,11 +33,8 @@ public class Entity0 extends Entity
         distanceTable[2][2] = 3;
         distanceTable[3][3] = 7;
 
-        // Notify all of the directly connected neighbors
-        notifyNeighbors();
 
     }
-    
     // Handle updates when a packet is received.  You will need to call
     // NetworkSimulator.toLayer2() with new packets based upon what you
     // send to update.  Be careful to construct the source and destination of
@@ -56,7 +64,7 @@ public class Entity0 extends Entity
             int prevMin = getDestMinCost(dest);
 
             // Update the table
-            System.out.println("distanceTable["+dest+"]["+p.getSource()+"] = "+costToSource+" + "+p.getMincost(dest));
+            //System.out.println("distanceTable["+dest+"]["+p.getSource()+"] = "+costToSource+" + "+p.getMincost(dest));
             distanceTable[dest][p.getSource()] = Math.min(INFINITY,costToSource + p.getMincost(dest));
 
            if(prevMin != getDestMinCost(dest))
@@ -83,6 +91,9 @@ public class Entity0 extends Entity
 
         boolean doNotify = false;
 
+        // Get old cost
+        int oldCost = distanceTable[whichLink][whichLink];
+
         // Update the current cost to the destination node
         for(int dest = 0; dest < NetworkSimulator.NUMENTITIES; dest++){
             if(dest == entityNum) continue;
@@ -94,8 +105,7 @@ public class Entity0 extends Entity
 
             // Skip over adding the distance if it is the changed link
             if(dest != whichLink){
-                int costToSource = distanceTable[dest][dest];
-                distanceTable[dest][whichLink] = Math.min(INFINITY,costToSource + newCost);
+                distanceTable[dest][whichLink] = Math.min(INFINITY,newCost + (distanceTable[dest][whichLink] - oldCost));
             }
 
 

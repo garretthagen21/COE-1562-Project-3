@@ -9,6 +9,17 @@ public class Entity1 extends Entity
         // Print that we are initalizing the node
         NetworkSimulator.printDebug("Entity"+entityNum+"() -> Initializing link costs for neighbors 0,2");
 
+        // Init table
+        initTable();
+
+        // Notify all of the directly connected neighbors
+        notifyNeighbors();
+
+    }
+
+    private void initTable()
+    {
+
         // Initialize everything to INFINITY
         for(int dest = 0; dest < NetworkSimulator.NUMENTITIES; dest++)
             for(int via = 0; via < NetworkSimulator.NUMENTITIES; via++)
@@ -20,11 +31,8 @@ public class Entity1 extends Entity
         distanceTable[2][2] = 1;
         distanceTable[3][3] = INFINITY;
 
-        // Notify all of the directly connected neighbors
-        notifyNeighbors();
 
     }
-
     // Handle updates when a packet is received.  You will need to call
     // NetworkSimulator.toLayer2() with new packets based upon what you
     // send to update.  Be careful to construct the source and destination of
@@ -80,10 +88,14 @@ public class Entity1 extends Entity
 
         boolean doNotify = false;
 
+        // Get old cost
+        int oldCost = distanceTable[whichLink][whichLink];
+
         // Update the current cost to the destination node
         for(int dest = 0; dest < NetworkSimulator.NUMENTITIES; dest++){
             if(dest == entityNum) continue;
 
+            // Get the previous minimum
             int prevMin = getDestMinCost(dest);
 
             // Assign here so we can get the prev min for the changed link first
@@ -91,15 +103,16 @@ public class Entity1 extends Entity
 
             // Skip over adding the distance if it is the changed link
             if(dest != whichLink){
-                int costToSource = distanceTable[dest][dest];
-                distanceTable[dest][whichLink] = Math.min(INFINITY,costToSource + newCost);
+                distanceTable[dest][whichLink] = Math.min(INFINITY,newCost + (distanceTable[dest][whichLink] - oldCost));
             }
 
-
+            // If this change has affected any minumums, update neighbors
             if(prevMin != getDestMinCost(dest))
                 doNotify = true;
 
         }
+
+        printDT();
 
         if(doNotify)
         {

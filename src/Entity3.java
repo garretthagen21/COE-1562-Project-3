@@ -9,6 +9,17 @@ public class Entity3 extends Entity
         // Print that we are initalizing the node
         NetworkSimulator.printDebug("Entity"+entityNum+"() -> Initializing link costs for neighbors 0,2");
 
+        // Init the table
+        initTable();
+
+        // Notify all of the directly connected neighbors
+        notifyNeighbors();
+
+    }
+
+    private void initTable()
+    {
+
         // Initialize everything to INFINITY
         for(int dest = 0; dest < NetworkSimulator.NUMENTITIES; dest++)
             for(int via = 0; via < NetworkSimulator.NUMENTITIES; via++)
@@ -20,9 +31,6 @@ public class Entity3 extends Entity
         distanceTable[1][1] = INFINITY;
         distanceTable[2][2] = 2;
         distanceTable[entityNum][entityNum] = 0;
-
-        // Notify all of the directly connected neighbors
-        notifyNeighbors();
 
     }
 
@@ -57,7 +65,7 @@ public class Entity3 extends Entity
             int prevMin = getDestMinCost(dest);
 
             // Update the table
-            System.out.println("distanceTable["+dest+"]["+p.getSource()+"] = "+costToSource+" + "+p.getMincost(dest));
+            //System.out.println("distanceTable["+dest+"]["+p.getSource()+"] = "+costToSource+" + "+p.getMincost(dest));
             distanceTable[dest][p.getSource()] = Math.min(INFINITY,costToSource + p.getMincost(dest));
 
             if(prevMin != getDestMinCost(dest))
@@ -71,7 +79,7 @@ public class Entity3 extends Entity
         // If the minium distance has changed notify neighbors
         if(doNotify)
         {
-            NetworkSimulator.printDebug("Entity"+entityNum+".update() -> Distance table has changed");
+            NetworkSimulator.printDebug("Entity"+entityNum+".update() -> Distance vector has changed");
             notifyNeighbors();
         }
 
@@ -80,17 +88,7 @@ public class Entity3 extends Entity
 
     public void linkCostChangeHandler(int whichLink, int newCost)
     {
-        NetworkSimulator.printDebug("Entity"+entityNum+".linkCostChangeHandler() -> Link "+whichLink+" cost has changed to "+newCost);
-
-        // Record previous minimum distance
-        int prevMinDist = getDestMinCost(whichLink);
-
-        // Update the table
-        distanceTable[whichLink][whichLink] = newCost;
-
-        // If the minium distance has changed notify neighbors
-        if(getDestMinCost(whichLink) != prevMinDist)
-            notifyNeighbors();
+       // Not in use
     }
 
     private void notifyNeighbors()
