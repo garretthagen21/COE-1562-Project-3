@@ -53,6 +53,7 @@ public class Entity2 extends Entity
             int prevMin = getDestMinCost(dest);
 
             // Update the table
+            System.out.println("distanceTable["+dest+"]["+p.getSource()+"] = "+costToSource+" + "+p.getMincost(dest));
             distanceTable[dest][p.getSource()] = Math.min(INFINITY,costToSource + p.getMincost(dest));
 
             if(prevMin != getDestMinCost(dest))
